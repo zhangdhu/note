@@ -5,3 +5,4 @@ Eclipse mac快捷键
 设置：command + ,
   
  来自windows的更新
+ 来自mac的更新
