@@ -22,3 +22,40 @@ ByteArrayOutputStream，FileOutputStream，PipedOutputStream，FilterOutputStrea
 装饰器方案规定封装于初始化对象中的所有对象都拥有相同的接口，以便利用装饰器的“透明”性质——我们将相同的消息发给一个对象，无论它是否已被“装饰”。
 
 抽象的“过滤器”类是所有装饰器的基础类
+
+1. 匿名内部类
+public class DirList2 {
+  public static FilenameFilter 
+  filter(final String afn) {
+    // Creation of anonymous inner class:
+    return new FilenameFilter() {
+      String fn = afn;
+      public boolean accept(File dir, String n) {
+        // Strip path information:
+        String f = new File(n).getName();
+        return f.indexOf(fn) != -1;
+      }
+    }; // End of anonymous inner class
+  }
+
+ 2. 顺序目录列表
+"Absolute path: " + f.getAbsolutePath() +
+   "\n Can read: " + f.canRead() +
+   "\n Can write: " + f.canWrite() +
+   "\n getName: " + f.getName() +
+   "\n getParent: " + f.getParent() +
+   "\n getPath: " + f.getPath() +
+   "\n length: " + f.length() +
+   "\n lastModified: " + f.lastModified());
+
+ 10.5 IO流的典型应用
+尽管库内存在大量IO流类，可通过多种不同的方式组合到一起，但实际上只有几种方式才会经常用到
+
+DataInputStream in = 
+        new DataInputStream(
+         new BufferedInputStream(
+          new FileInputStream("/Users/guqianqian/tmp/Cleanup.java")));
+
+
+
+
