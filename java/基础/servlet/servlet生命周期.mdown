@@ -1,22 +1,49 @@
 Servlet 生命周期.md
 
-Servlet 生命周期
-Servlet 生命周期可被定义为从创建直到毁灭的整个过程。以下是 Servlet 遵循的过程：
-Servlet 通过调用 init () 方法进行初始化。
-Servlet 调用 service() 方法来处理客户端的请求。
-Servlet 通过调用 destroy() 方法终止（结束）。
-最后，Servlet 是由 JVM 的垃圾回收器进行垃圾回收的。
-现在让我们详细讨论生命周期的方法。
+Servlet生命周期分为三个阶段：
 
-#init() 方法
-init 方法被设计成只调用一次。它在第一次创建 Servlet 时被调用，在后续每次用户请求时不再调用。
+　　1，初始化阶段  调用init()方法
 
-service() 方法
-service() 方法是执行实际任务的主要方法。Servlet 容器（即 Web 服务器）调用 service() 方法来处理来自客户端（浏览器）的请求，并把格式化的响应写回给客户端。
-每次服务器接收到一个 Servlet 请求时，服务器会产生一个新的线程并调用服务。service() 方法检查 HTTP 请求类型（GET、POST、PUT、DELETE 等），并在适当的时候调用 doGet、doPost、doPut，doDelete 等方法。
+　　2，响应客户请求阶段　　调用service()方法
 
-destroy() 方法
-destroy() 方法只会被调用一次，在 Servlet 生命周期结束时被调用。destroy() 方法可以让您的 Servlet 关闭数据库连接、停止后台线程、把 Cookie 列表或点击计数器写入到磁盘，并执行其他类似的清理活动。
-在调用 destroy() 方法之后，servlet 对象被标记为垃圾回收。destroy 方法定义如下所示：
+　　3，终止阶段　　调用destroy()方法
+
+Servlet初始化阶段：
+
+　　在下列时刻Servlet容器装载Servlet：
+
+
+1，Servlet容器启动时自动装载某些Servlet，实现它只需要在web.XML文件中的<Servlet></Servlet>之间添加如下代码：
+    <loadon-startup>1</loadon-startup> 
+2，在Servlet容器启动后，客户首次向Servlet发送请求
+3，Servlet类文件被更新后，重新装载Servlet
+　　Servlet被装载后，Servlet容器创建一个Servlet实例并且调用Servlet的init()方法进行初始化。在Servlet的整个生命周期内，init()方法只被调用一次。
+　　容器初始化一个servlet时，会为这个servlet建一个唯一的ServletConfig。容器从DD读出Servlet初始化参数，并把这些参数交给ServletConfig，然后把ServletConfig传递给servlet的init(ServletConfig config)方法。也就是说容器只有在创建servlet实例时才会读DD文件中的init-param，并且在servlet一生中只读一次。
+
+在实际应用过程中，为了便于修改我们并不希望直接把某一变量硬编码到servlet类中，这个时候就会用到ServletConfig接口。我们可以把某些变量放在DD(web.xml)中,这样如果我们要修改某一值，可以直接改动DD文件即可。
+
+Servlet工作原理：
+　　首先简单解释一下Servlet接收和响应客户请求的过程，首先客户发送一个请求，Servlet是调用service()方法对请求进行响应的，通过源代码可见，service()方法中对请求的方式进行了匹配，选择调用doGet,doPost等这些方法，然后再进入对应的方法中调用逻辑层的方法，实现对客户的响应。在Servlet接口和GenericServlet中是没有doGet,doPost等等这些方法的，HttpServlet中定义了这些方法，但是都是返回error信息，所以，我们每次定义一个Servlet的时候，都必须实现doGet或doPost等这些方法。
+
+　　每一个自定义的Servlet都必须实现Servlet的接口，Servlet接口中定义了五个方法，其中比较重要的三个方法涉及到Servlet的生命周期，分别是上文提到的init(),service(),destroy()方法。GenericServlet是一个通用的，不特定于任何协议的Servlet,它实现了Servlet接口。而HttpServlet继承于GenericServlet，因此HttpServlet也实现了Servlet接口。所以我们定义Servlet的时候只需要继承HttpServlet即可。
+
+　　Servlet接口和GenericServlet是不特定于任何协议的，而HttpServlet是特定于HTTP协议的类，所以HttpServlet中实现了service()方法，并将请求ServletRequest,ServletResponse强转为HttpRequest和HttpResponse。
+
+Servlet何时被创建：
+
+　　1，默认情况下，当WEB客户第一次请求访问某个Servlet的时候，WEB容器将创建这个Servlet的实例。
+
+　　2，当web.xml文件中如果<servlet>元素中指定了<load-on-startup>子元素时，Servlet容器在启动web服务器时，将按照顺序创建并初始化Servlet对象。
+
+　　注意：在web.xml文件中，某些Servlet只有<serlvet>元素，没有<servlet-mapping>元素，这样我们无法通过url的方式访问这些Servlet，这种Servlet通常会在<servlet>元素中配置一个<load-on-startup>子元素，让容器在启动的时候自动加载这些Servlet并调用init()方法，完成一些全局性的初始化工作。
+
+
+
+Web应用何时被启动：
+
+　　1，当Servlet容器启动的时候，所有的Web应用都会被启动
+
+　　2，控制器启动web应用
+
 
 
