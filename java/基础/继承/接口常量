@@ -1,0 +1,2 @@
+由于java interface中声明的字段在编译时会自动加上static final的修饰符，即声明为常量。
+因而interface通常是存放常量的最佳地点。
