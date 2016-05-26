@@ -1,0 +1,5 @@
+其中“@Deprecated”意在-----这个方法或类不再建议使用。在新版本中有其他方法或类可以代替这个使用，以后的版本也不会再更新这个方法或类
+
+echo $JAVA_HOME /Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home
+export PATH=/Users/guqianqian/opt/apache-maven-3.3.9/bin:$PATH
+

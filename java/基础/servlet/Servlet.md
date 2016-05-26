@@ -11,3 +11,7 @@ Servlet 通过调用 init () 方法进行初始化。
 Servlet 调用 service() 方法来处理客户端的请求。
 Servlet 通过调用 destroy() 方法终止（结束）。
 最后，Servlet 是由 JVM 的垃圾回收器进行垃圾回收的。
+
+ServletAPI由哪两个包组成
+javax.servlet
+javax.servlet.http
