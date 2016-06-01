@@ -1,0 +1,12 @@
+PreparedStatement是用来执行SQL查询语句的API之一，Java提供了 Statement、PreparedStatement 和 CallableStatement三种方式来执行查询语句，
+
+Statement 用于通用查询， 
+PreparedStatement 用于执行参数化查询，预处理查询。
+CallableStatement则是用于存储过程。
+
+PreparedStatement优势：
+1、PreparedStatement可以写动态参数化的查询
+2、PreparedStatement比 Statement 更快
+
+Statement：用于执行静态SQL语句并返回它所生成结果的对象，在执行时确定sql； PrepareStatement：表示预编译的SQL语句对象，SQL语句被预编译并存储在PrepareStatement对象中，然后可以使用此对象高效的多次执行该语句，可以传递参数，在得到PrepareStatement对象时确定sql；
+

@@ -1,0 +1,16 @@
+1、cd ~/opt/redis-3.2.0
+2、./src/redis-server redis.conf 
+
+
+
+curl -O http://redis.googlecode.com/files/redis-2.8.7.tar.gz
+sudo tar -zxf redis-2.8.7.tar.gz
+
+3)修改文件夹名,编译
+
+mv redis-2.8.7 redis
+cd redis/
+sudo make
+sudo make test
+sudo make isntall
+
