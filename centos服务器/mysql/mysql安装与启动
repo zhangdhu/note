@@ -1,0 +1,54 @@
+http://www.cnblogs.com/xiaoluo501395377/archive/2013/04/07/3003278.html
+
+1、卸载掉原有mysql
+
+[root@xiaoluo ~]# rpm -qa | grep mysql　　// 这个命令就会查看该操作系统上是否已经安装了mysql数据库
+
+2、删除 rpm -e --nodeps mysql-libs-5.1.73-3.el6_5.x86_64
+
+3、安装：yum install -y mysql-server mysql mysql-deve
+
+4、检查：rpm -qi mysql-server
+
+5、启动： service mysqld start
+
+6、修改密码：mysqladmin -u root password 'mysql'
+默认密码是空
+
+
+
+二。CentOS 6.5/6.6 安装mysql 5.7 最完整版教程
+Step1: 检测系统是否自带安装mysql
+
+# yum list installed | grep mysql
+Step2: 删除系统自带的mysql及其依赖
+命令：
+
+# yum -y remove mysql-libs.x86_64
+Step3: 给CentOS添加rpm源，并且选择较新的源
+命令：
+
+# wget dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm
+# yum localinstall mysql-community-release-el6-5.noarch.rpm
+# yum repolist all | grep mysql
+# yum-config-manager --disable mysql55-community
+# yum-config-manager --disable mysql56-community
+# yum-config-manager --enable mysql57-community-dmr
+# yum repolist enabled | grep mysql
+Step4:安装mysql 服务器
+命令：
+
+# yum install mysql-community-server
+Step5: 启动mysql
+命令:
+
+# service mysqld start
+Step6: 查看mysql是否自启动,并且设置开启自启动
+命令:
+
+# chkconfig --list | grep mysqld
+# chkconfig mysqld on
+Step7: mysql安全设置
+命令：
+
+全选复制放进笔记# mysql_secure_installation
