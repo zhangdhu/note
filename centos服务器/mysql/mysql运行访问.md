@@ -6,7 +6,7 @@ grant all privileges on *.* to 'root'@'%' identified by 'mysql' with grant optio
 
 flush privileges; # 重载系统权限
 exit;
-
+http://121.42.204.167
 允许3306端口
 iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT
 # 查看规则是否生效
@@ -19,3 +19,17 @@ vi /etc/sysconfig/iptables-config  # 加上下面这行规则也是可以的
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT
 
 
+ 
+
+                location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+                        {
+                                expires      30d;
+                        }
+
+                location ~ .*\.(js|css)?$
+                        {
+                                expires      12h;
+                        }
+
+                access_log  /home/wwwlogs/www.myhost.com.log  www.myhost.com;
+        }
