@@ -22,5 +22,5 @@ Command + E：快速显示当前Editer的下拉列表（如果当前页面没有
 
 ，输入Syso然后按 ALT+/
 
- main 按ALT+/
+main 按ALT+/
  

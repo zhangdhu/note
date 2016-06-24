@@ -1,0 +1,157 @@
+基于Mybatis+redis的三级缓存系统。
+一、三级缓存架构
+	mybatis负责第一二层缓存，redis处理第三层缓存。
+1、SQL级缓存
+它的作用域是同一sqlSession下，在同一个sqlSession中，第一次执行一条语句时，会缓存起来，再执行同一语句时，不会再查询数据库，直接从缓存取数据。
+例如：
+
+List<User> users = userDao.findAll(user);
+for(User userTem: users){
+    JobModel  jobModel = jobDao.findJobById(userTem.getJobId());
+}
+
+执行后打打印的结果如下
+DEBUG findAll - ==>  Preparing: select * from t_user 
+DEBUG findAll - ==> Parameters: 
+DEBUG findAll - <==      Total: 100
+DEBUG findJobById - ==>  Preparing: select * from t_job where id = ? 
+DEBUG findJobById - ==> Parameters: 1(Integer)
+DEBUG findJobById - <==      Total: 1
+大家看到了吗，100次循环，只打印了一条查询语句。说明只查询了一次，其他99次都是直接从缓存中获取。
+
+2、mapper级缓存。
+mapper级缓存要比sqlSession级缓存范围要大的多，它对整个mapper下的数据进行缓存。
+使用二级缓存要做如下事情
+1）在mybatis_conf.xml中添加
+<settings>
+    <setting name="cacheEnabled" value="true" />
+</settings>
+2)在select语句中开启cache,设置useCache为true
+<select id="findAll" resultMap="BaseResultMap" parameterType="User" useCache="true" >
+    select  * from t_user
+</select>
+3）在Mapper中添加cache配置
+<!--60秒 
+1、LRU – 最近最少使用的:移除最长时间不被使用的对象。
+2、FIFO – 先进先出:按对象进入缓存的顺序来移除它们。
+3、SOFT – 软引用:移除基于垃圾回收器状态和软引用规则的对象。
+4、WEAK – 弱引用:更积极地移除基于垃圾收集器状态和弱引用规则的对象。-->
+<cache
+        eviction="FIFO"
+        flushInterval="60000"
+        size="512"
+        readOnly="true"/>
+这样就开启了二级cache
+例如：
+    List<User> users = userDao.findAll(user);
+打开日志如下
+DEBUG findAll - ==>  Preparing: select * from t_user 
+DEBUG findAll - ==> Parameters: 
+DEBUG findAll - <==      Total: 100
+当再次调用时
+ DEBUG UserDao - Cache Hit Ratio [com.zhangdahu.ehcache.dao.UserDao]: 0.3333333333333333
+ 第二调用时 不再查询数据库。
+
+ 总结mybatis的两级缓存的区别，第一级的是一次service下，多个相同sql查询的缓存，而第二级mapper级缓存是一段时间内调用一个接口的缓存。
+
+3、redis缓存。
+1) 首先安装redis
+curl -O http://redis.googlecode.com/files/redis-2.8.7.tar.gz
+sudo tar -zxf redis-2.8.7.tar.gz
+mv redis-2.8.7 redis
+cd redis/
+sudo make
+sudo make test
+sudo make isntall
+
+然后启动redis
+src/redis-server redis.conf
+
+2)添加两个包
+
+<dependency>
+    <groupId>org.springframework.data</groupId>
+    <artifactId>spring-data-redis</artifactId>
+    <version>1.6.0.RELEASE</version>
+</dependency>
+
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+    <version>2.8.1</version>
+</dependency>
+
+3）添加配置文件 
+
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+
+/**
+ * @author zhangdh-a
+ * @description TODO
+ * @created 16-5-25.
+ */
+@Configuration
+@EnableCaching
+public class RedisCacheConfig extends CachingConfigurerSupport{
+    @Bean
+    public JedisConnectionFactory redisConnectionFactory() {
+        JedisConnectionFactory redisConnectionFactory = new JedisConnectionFactory();
+
+        // Defaults
+        redisConnectionFactory.setHostName("127.0.0.1");
+        redisConnectionFactory.setPort(Integer.parseInt("6379"));
+        return redisConnectionFactory;
+    }
+
+    @Bean
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<String, String>();
+        redisTemplate.setConnectionFactory(cf);
+        return redisTemplate;
+    }
+
+    @Bean
+    public CacheManager cacheManager(RedisTemplate redisTemplate) {
+        RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
+        // Number of seconds before expiration. Defaults to unlimited (0)
+        //设成一个小时清空一次缓冲。
+        cacheManager.setDefaultExpiration(60 * 60 * 4); // Sets the default expire time (in seconds)
+        return cacheManager;
+    }
+
+}
+
+4）在你需要缓存的service注解
+  @Cacheable(value="findAllUsers", key = "'findAll'")
+  List<User> findAll(User user);
+然后重启后，只有第一次查询数据库，以后不再查询数据库。
+
+所以redis是service级的查询，它可以有多个mapper的数据库关系，然后放到一个对象中进行存储数据。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
